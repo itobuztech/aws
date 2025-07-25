@@ -1,0 +1,26 @@
+{
+  "name": "aws",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --exec ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "Anup",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.0.12",
+    "dotenv": "^17.1.0",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ec2": "^3.843.0",
+    "@types/express": "^5.0.3",
+    "axios": "^1.10.0",
+    "express": "^5.1.0",
+    "ts-node": "^10.9.2"
+  }
+}
