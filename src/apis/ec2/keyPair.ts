@@ -43,8 +43,6 @@ router.post("/create", async (req: Request, res: Response) => {
   };
 
   try {
-    console.log("Creating Key Pair with input:", input);
-
     const command = new CreateKeyPairCommand(input);
     const response: any = await client.send(command);
     console.log("Key Pair response:", response);
@@ -55,7 +53,7 @@ router.post("/create", async (req: Request, res: Response) => {
     });
 
     res.status(200).json({
-      message: `KeyPair created successfully`,
+      message: `KeyPair '${response.keyPairId}' created successfully`,
       response: response,
     });
   } catch (error: any) {
