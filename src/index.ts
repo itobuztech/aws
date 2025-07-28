@@ -23,10 +23,10 @@ async function startNodeExpressServer() {
   app.use("/securityGroups", securityGroups);
   app.use("/volumes", volumes);
 
-  const port = 3000;
+  const PORT = process.env.PORT || 3000;
 
-  app.listen(port, () => {
-    console.log(`Listening to port : ${port}`);
+  app.listen(PORT, () => {
+    console.log(`Listening to PORT : ${PORT}`);
   });
 }
 

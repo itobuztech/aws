@@ -5,6 +5,8 @@ import {
   DescribeKeyPairsCommand,
   DeleteKeyPairCommand,
 } from "@aws-sdk/client-ec2";
+import path from "path";
+import fs from "fs";
 
 const router = express.Router();
 
@@ -13,21 +15,24 @@ const client = new EC2Client({
 });
 
 router.post("/create", async (req: Request, res: Response) => {
-  const { KeyName, KeyType, ResourceType, Key, Value, KeyFormat, ImageId } =
-    req.body;
+  const { KeyName, Key, Value, KeyFormat } = req.body;
+  try {
+    fs.mkdirSync("downloads/key-pairs", { recursive: true, mode: 0o444 });
+  } catch (err: any) {
+    res.status(200).json({
+      message: `Error creating directory!`,
+      errorDetails: err,
+    });
+  }
+  const SAVE_PATH = path.join("downloads/key-pairs", `${KeyName}.pem`); // Save location
   const input: any = {
-    // CreateKeyPairRequest
     KeyName, // required
-    KeyType,
+    KeyType: "rsa",
     TagSpecifications: [
-      // TagSpecificationList
       {
-        // TagSpecification
-        ResourceType,
+        ResourceType: "key-pair",
         Tags: [
-          // TagList
           {
-            // Tag
             Key,
             Value,
           },
@@ -41,8 +46,14 @@ router.post("/create", async (req: Request, res: Response) => {
     console.log("Creating Key Pair with input:", input);
 
     const command = new CreateKeyPairCommand(input);
-    const response = await client.send(command);
-    console.log("Key Pair Created:", response);
+    const response: any = await client.send(command);
+    console.log("Key Pair response:", response);
+
+    fs.writeFileSync(SAVE_PATH, response.KeyMaterial, {
+      encoding: "utf8",
+      mode: 0o444, // read-only for user (Linux/macOS)
+    });
+
     res.status(200).json({
       message: `KeyPair created successfully`,
       response: response,
