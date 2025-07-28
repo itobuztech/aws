@@ -7,6 +7,7 @@ import {
   StopInstancesCommand,
   RunInstancesCommand,
   TerminateInstancesCommand,
+  ModifyInstanceAttributeCommand,
 } from "@aws-sdk/client-ec2";
 
 const router = express.Router();
@@ -297,4 +298,34 @@ router.delete(
     }
   }
 );
+
+router.put("/modify/:instanceId", async (req: Request, res: Response) => {
+  try {
+    const input = {
+      InstanceId: req.params.instanceId,
+      InstanceType: {
+        Value: req.body.InstanceType,
+      },
+    };
+
+    console.log("Modifying instance with input:", input);
+
+    const command = new ModifyInstanceAttributeCommand(input);
+    const response = await client.send(command);
+    console.log("Instance type updated:", response);
+    res.status(200).json({
+      message: `Instance for ${req.params.instanceId} updated to successfully`,
+      response: response,
+    });
+  } catch (error: any) {
+    console.error(
+      `Error updating instance type for ${req.params.instanceId}:`,
+      error
+    );
+    res.status(500).json({
+      error: "Failed to update instance type:",
+      ErrorDetails: error,
+    });
+  }
+});
 export default router;
