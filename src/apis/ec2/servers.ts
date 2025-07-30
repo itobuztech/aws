@@ -328,4 +328,70 @@ router.put("/modify/:instanceId", async (req: Request, res: Response) => {
     });
   }
 });
+
+router.post("/createWithScript", async (req: Request, res: Response) => {
+  const {
+    DeviceName,
+    VolumeSize,
+    ImageId,
+    InstanceType,
+    MinCount,
+    MaxCount,
+    KeyName,
+    SecurityGroupIds,
+    ResourceType,
+    Key,
+    Value,
+  } = req.body;
+  try {
+    const input: any = {
+      BlockDeviceMappings: [
+        {
+          DeviceName,
+          Ebs: {
+            VolumeSize,
+          },
+        },
+      ],
+      ImageId,
+      InstanceType,
+      MinCount,
+      MaxCount,
+      KeyName,
+      SecurityGroupIds: [SecurityGroupIds],
+      TagSpecifications: [
+        {
+          ResourceType,
+          Tags: [{ Key, Value }],
+        },
+      ],
+      UserData: Buffer.from(
+        `#!/bin/bash
+          # Install NVM
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+          # Load NVM and install Node.js
+          source ~/.bashrc
+          nvm install --lts
+          node -e "console.log('Running Node.js ' + process.version)"
+          `
+      ).toString("base64"),
+    };
+
+    const command = new RunInstancesCommand(input);
+    const response: any = await client.send(command);
+    console.log("Instance started:", response);
+
+    res.status(200).json({
+      message: `Instance '${response.Instances[0].InstanceId}' started successfully`,
+      response: response.Instances,
+    });
+  } catch (error: any) {
+    console.error(`Error starting instance ${req.params.instanceId}:`, error);
+    res
+      .status(500)
+      .json({ error: "Failed to start instance:", ErrorDetails: error });
+  }
+});
+
 export default router;
