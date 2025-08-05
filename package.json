@@ -11,16 +11,19 @@
   "author": "Anup",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^24.0.12",
+    "@types/express": "^5.0.3",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.2.0",
     "dotenv": "^17.1.0",
     "nodemon": "^3.1.10",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "@aws-sdk/client-ec2": "^3.843.0",
-    "@types/express": "^5.0.3",
+    "@aws-sdk/client-s3": "^3.858.0",
     "axios": "^1.10.0",
     "express": "^5.1.0",
+    "multer": "^2.0.2",
     "ts-node": "^10.9.2"
   }
 }

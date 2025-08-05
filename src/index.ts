@@ -5,23 +5,22 @@ import keyPair from "./apis/ec2/keyPair";
 import getIAMRole from "./apis/ec2/getIAMRole";
 import securityGroups from "./apis/ec2/securityGroup";
 import volumes from "./apis/ec2/volumes";
+import uploadFiles from "./apis/S3/uploadsFiles";
 
 const app = express();
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 config();
 
 async function startNodeExpressServer() {
-  const app = express();
-
-  app.use(express.json());
-
   app.use("/servers", listServers);
   app.use("/keyPair", keyPair);
   app.use("/getIAMRole", getIAMRole);
   app.use("/securityGroups", securityGroups);
   app.use("/volumes", volumes);
+  app.use("/s3/image", uploadFiles);
 
   const PORT = process.env.PORT || 3000;
 
