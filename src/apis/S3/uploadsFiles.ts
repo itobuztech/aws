@@ -60,7 +60,7 @@ router.post(
       res.status(200).json({
         message: "File uploaded successfully",
         fileName: file.filename,
-        filePath: `https://${process.env.S3_BUCKET_NAME}.${process.env.S3_BUCKET_REGION}.s3.amazonaws.com/${file.filename}`,
+        filePath: `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_BUCKET_REGION}.amazonaws.com/${file.filename}`,
         response: response,
       });
     } catch (caught) {
