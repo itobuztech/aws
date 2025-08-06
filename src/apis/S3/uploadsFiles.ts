@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import { readFile } from "node:fs/promises";
 import { config } from "dotenv";
 import * as fs from "fs";
 import multer from "multer";
@@ -8,7 +7,6 @@ import {
   S3Client,
   S3ServiceException,
 } from "@aws-sdk/client-s3";
-import e from "express";
 
 config();
 
@@ -16,7 +14,6 @@ const router = express.Router();
 
 const client = new S3Client({
   region: process.env.S3_BUCKET_REGION,
-  // endpoint: `https://s3.${process.env.AWS_REGION}.amazonaws.com`,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
@@ -43,6 +40,8 @@ router.post(
   "/uploadFiles",
   upload.single("file"),
   async (req: Request, res: Response) => {
+    const { s3_bucket_name } = req.body;
+
     const file = req.file;
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -52,10 +51,11 @@ router.post(
 
     try {
       const command = new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET_NAME,
+        Bucket: s3_bucket_name,
         Key: `${file.filename}`,
         Body: fileStream,
       });
+
       const response = await client.send(command);
       res.status(200).json({
         message: "File uploaded successfully",
