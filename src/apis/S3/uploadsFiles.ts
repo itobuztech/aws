@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import * as fs from "fs";
 import multer from "multer";
 import {
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
   S3ServiceException,
@@ -90,5 +91,39 @@ router.post(
     }
   }
 );
+
+router.get("/:s3_bucket_name", async (req: Request, res: Response) => {
+  const { s3_bucket_name } = req.params;
+  const input: any = {
+    Bucket: s3_bucket_name,
+  };
+
+  try {
+    const command = new ListObjectsV2Command(input);
+    const response: any = await client.send(command);
+
+    console.log("Files listed:", response);
+
+    if (response.Contents && response.Contents.length > 0) {
+      const files = response.Contents.map((file: any) => ({
+        Key: file.Key,
+        LastModified: file.LastModified,
+        Size: file.Size,
+      }));
+      res.status(200).json({
+        message: `Files of the '${s3_bucket_name}' bucket listed successfully!`,
+        files: files,
+      });
+    } else {
+      res.status(404).json({ message: "No files found in the bucket!" });
+    }
+  } catch (error: any) {
+    console.error("Error listing files:", error);
+    res.status(500).json({
+      error: "Failed to list files!",
+      errorDetails: error.message,
+    });
+  }
+});
 
 export default router;
