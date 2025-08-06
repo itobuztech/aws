@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import * as fs from "fs";
 import multer from "multer";
 import {
+  DeleteObjectCommand,
   GetBucketAclCommand,
   ListObjectsV2Command,
   PutObjectCommand,
@@ -149,6 +150,31 @@ router.get(
       res.status(500).json({
         error: "Failed to get bucket ACL",
         errorDetails: err,
+      });
+    }
+  }
+);
+
+router.delete(
+  "/deleteFile/:s3_bucket_name/:fileName",
+  async (req: Request, res: Response) => {
+    const { s3_bucket_name, fileName } = req.params;
+    const input: any = {
+      Bucket: s3_bucket_name,
+      Key: fileName,
+    };
+    try {
+      const command = new DeleteObjectCommand(input);
+      const response = await client.send(command);
+
+      res.status(200).json({
+        message: `File '${fileName}' deleted successfully from bucket '${s3_bucket_name}'!`,
+        response: response,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: "Failed to delete file",
+        errorDetails: error,
       });
     }
   }
