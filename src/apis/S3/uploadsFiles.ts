@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import * as fs from "fs";
 import multer from "multer";
 import {
+  GetBucketAclCommand,
   ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
@@ -125,5 +126,32 @@ router.get("/:s3_bucket_name", async (req: Request, res: Response) => {
     });
   }
 });
+
+router.get(
+  "/permission/:s3_bucket_name",
+  async (req: Request, res: Response) => {
+    const { s3_bucket_name } = req.params;
+    console.log("Getting bucket ACL for:", s3_bucket_name);
+
+    const input: any = {
+      Bucket: s3_bucket_name,
+    };
+
+    try {
+      const command = new GetBucketAclCommand(input);
+      const response = await client.send(command);
+
+      res.status(200).json({
+        message: `Bucket '${s3_bucket_name}' ACL listed successfully!`,
+        response: response,
+      });
+    } catch (err) {
+      res.status(500).json({
+        error: "Failed to get bucket ACL",
+        errorDetails: err,
+      });
+    }
+  }
+);
 
 export default router;
