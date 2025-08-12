@@ -301,11 +301,17 @@ router.delete(
 
 router.put("/modify/:instanceId", async (req: Request, res: Response) => {
   try {
-    const input = {
+    const input: any = {
       InstanceId: req.params.instanceId,
       InstanceType: {
         Value: req.body.InstanceType,
       },
+      UserData: Buffer.from(
+        `#!/bin/bash
+        cd /nodejs
+        git clone git@github.com:itobuztech/delivery_tracking_app.git
+        `
+      ).toString("base64"),
     };
 
     console.log("Modifying instance with input:", input);
@@ -343,6 +349,7 @@ router.post("/createWithScript", async (req: Request, res: Response) => {
     Key,
     Value,
   } = req.body;
+
   try {
     const input: any = {
       BlockDeviceMappings: [
@@ -365,22 +372,24 @@ router.post("/createWithScript", async (req: Request, res: Response) => {
           Tags: [{ Key, Value }],
         },
       ],
+      // UserData: Buffer.from(
+      //   `#!/bin/bash
+      //   sudo apt update -y
+      //   sudo apt install -y nodejs
+      //   `
+      // ).toString("base64"),
       UserData: Buffer.from(
         `#!/bin/bash
-          # Install NVM
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-
-          # Load NVM and install Node.js
-          source ~/.bashrc
-          nvm install --lts
-          node -e "console.log('Running Node.js ' + process.version)"
-          `
+        sudo apt update -y
+        curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
+        sudo apt install -y nodejs
+        `
       ).toString("base64"),
     };
 
     const command = new RunInstancesCommand(input);
     const response: any = await client.send(command);
-    console.log("Instance started:", response);
+    // console.log("Instance started:", response);
 
     res.status(200).json({
       message: `Instance '${response.Instances[0].InstanceId}' started successfully`,
@@ -395,3 +404,5 @@ router.post("/createWithScript", async (req: Request, res: Response) => {
 });
 
 export default router;
+
+// git clone git@github.com:itobuztech/delivery_tracking_app.git
